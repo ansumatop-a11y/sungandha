@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sugandhika | Bella Vita Luxury Boutique</title>
+<style>
+  :root { --gold: #D4AF37; --dark: #080808; --red: #ff3e3e; --green: #25D366; }
+  body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; overflow-x: hidden; }
+  
+  /* STICKY FLASH SALE TIMER */
+  .timer-bar { background: var(--red); color: white; padding: 12px; text-align: center; font-weight: bold; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(255,62,62,0.4); text-transform: uppercase; }
+
+  header { padding: 80px 20px; text-align: center; border-bottom: 2px solid var(--gold); background: linear-gradient(rgba(0,0,0,0.8), #080808), url('https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=1500&q=80'); background-size: cover; }
+  header h1 { font-size: 3.5em; letter-spacing: 12px; color: var(--gold); margin: 0; text-transform: uppercase; text-shadow: 0 0 20px rgba(212,175,55,0.5); }
+
+  section { padding: 40px 20px; max-width: 1400px; margin: auto; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+
+  /* PRODUCT CARDS */
+  .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.1); border-radius: 20px; padding: 25px; text-align: center; transition: 0.4s; backdrop-filter: blur(10px); position: relative; }
+  .card:hover { transform: translateY(-10px); border-color: var(--gold); background: rgba(255,255,255,0.08); }
+  .card img { width: 100%; height: 220px; object-fit: contain; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5)); }
+  .card h3 { color: var(--gold); font-size: 1.3em; margin: 15px 0 5px; text-transform: uppercase; }
+  .notes { color: #888; font-size: 0.8em; font-style: italic; min-height: 40px; }
+  .price { font-size: 1.6em; font-weight: bold; margin: 15px 0; }
+  .mrp { text-decoration: line-through; color: #555; font-size: 0.6em; margin-right: 10px; }
+
+  .btn-direct { background: var(--gold); color: black; border: none; padding: 14px; width: 100%; border-radius: 50px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+  .btn-direct:hover { background: white; box-shadow: 0 0 20px var(--gold); }
+
+  /* CHECKOUT & VERIFICATION POPUP */
+  #checkout { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; display: none; justify-content: center; align-items: center; }
+  .checkout-box { background: white; color: black; padding: 30px; border-radius: 25px; text-align: center; max-width: 380px; width: 90%; position: relative; overflow: hidden; }
+  
+  .qr-container { width: 220px; height: 220px; margin: 20px auto; overflow: hidden; border: 5px solid #eee; border-radius: 10px; position: relative; }
+  .qr-container img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.5); } 
+
+  #success-screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+  .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  footer { padding: 50px; text-align: center; border-top: 1px solid #222; color: #444; font-size: 0.9em; }
+</style>
+</head>
+<body>
+
+<div class="timer-bar">⚡ FLASH SALE ENDS IN: <span id="clock">13:00:00</span> ⚡</div>
+
+<header>
+  <h1>Sugandhika</h1>
+  <p style="color: var(--gold); letter-spacing: 4px; font-weight: bold;">OFFICIAL BELLA VITA LUXURY RESELLER</p>
+</header>
+
+<section><div class="grid" id="mainGrid"></div></section>
+
+<div id="checkout">
+  <div class="checkout-box">
+    <div id="success-screen">
+        <div id="loading-state">
+            <div class="loader"></div>
+            <p>Verifying Payment with Bank...</p>
+        </div>
+        <div id="confirmed-state" style="display:none">
+            <h2 style="color: var(--green); margin-bottom:5px;">✔ ORDER CONFIRMED</h2>
+            <p>We've received your request for <br><b id="conf-prod"></b></p>
+            <a id="waFinal" href="#" style="background:var(--green); color:white; padding:15px; display:block; text-decoration:none; border-radius:10px; font-weight:bold; margin: 20px 0;">SEND SCREENSHOT TO WHATSAPP</a>
+            <small style="color:#888">Order ID: SUG-${Math.floor(Math.random()*9999)}</small>
+        </div>
+    </div>
+
+    <h2 style="margin:0">Direct Order</h2>
+    <p style="font-size:0.9em">Scan to Pay via Any UPI App</p>
+    <div class="qr-container"><img src="qr.jpg" alt="UPI QR"></div>
+    <p style="font-size:0.8em; color:#666">No COD. Scan and Pay, then click the button below to confirm.</p>
+    <button onclick="startVerification()" style="background:var(--gold); border:none; padding:15px; width:100%; border-radius:10px; font-weight:bold; cursor:pointer; text-transform:uppercase;">I HAVE PAID - VERIFY NOW</button>
+    <button onclick="closePay()" style="background:none; border:none; color:#999; cursor:pointer; margin-top:15px;">Cancel</button>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 SUGANDHIKA | WhatsApp: +91 7053503574</p>
+  <p style="font-size: 0.7em;">All product images & trademarks belong to Bella Vita Luxury.</p>
+</footer>
+
+<script>
+const waNo = "917053503574";
+let selectedItem = "";
+let selectedPrice = 0;
+
+const products = [
+  { n: "CEO MAN EDP", m: 899, p: 499, nt: "Lemon, Lavender, Vetiver", img: "https://m.media-amazon.com/images/I/61m1hD9K-HL._SL1500_.jpg" },
+  { n: "WHITE OUD", m: 999, p: 549, nt: "Tobacco, Coriander, Oud", img: "https://m.media-amazon.com/images/I/51r+fNfS8SL._SL1500_.jpg" },
+  { n: "DATE WOMAN", m: 999, p: 549, nt: "Honey, Jasmine, Pink Pepper", img: "https://m.media-amazon.com/images/I/51pI-FvV5vL._SL1500_.jpg" },
+  { n: "HONEY OUD", m: 999, p: 599, nt: "Honey, Bergamot, Rose", img: "https://m.media-amazon.com/images/I/61mIuY+9VfL._SL1500_.jpg" },
+  { n: "KLUB MAN", m: 799, p: 449, nt: "Lemon, Pineapple, Patchouli", img: "https://m.media-amazon.com/images/I/61I+6S+y1pL._SL1500_.jpg" },
+  { n: "SKAI AQUATIC", m: 899, p: 499, nt: "Marine Notes, Bergamot", img: "https://m.media-amazon.com/images/I/61M6Yp8j19L._SL1500_.jpg" },
+  { n: "LUXURY GIFT SET", m: 1599, p: 849, nt: "Pack of 4 Best Sellers", img: "https://m.media-amazon.com/images/I/71N0XpS6SUL._SL1500_.jpg" },
+  { n: "SENORITA", m: 999, p: 549, nt: "Yuzu, Pomegranate, Peony", img: "https://m.media-amazon.com/images/I/61T0z2-R8yL._SL1500_.jpg" },
+  { n: "IMPACT MAN", m: 899, p: 499, nt: "Orange, Nutmeg, Sandalwood", img: "https://m.media-amazon.com/images/I/61vU2rE63aL._SL1500_.jpg" },
+  { n: "OUD GOLD", m: 1299, p: 699, nt: "Caramel, Vanilla, Oud", img: "https://m.media-amazon.com/images/I/61qHInD7GLL._SL1500_.jpg" },
+  { n: "DOMINUS", m: 899, p: 499, nt: "Rose, Agarwood, Amber", img: "https://m.media-amazon.com/images/I/61nNUn8uLBL._SL1500_.jpg" },
+  { n: "GLAM WOMAN", m: 999, p: 549, nt: "Orange Blossom, Jasmine", img: "https://m.media-amazon.com/images/I/61x0+h0DkPL._SL1500_.jpg" },
+  { n: "FRESH UNISEX", m: 799, p: 399, nt: "Citrus, Mint, White Musk", img: "https://m.media-amazon.com/images/I/61+9KPrvW9L._SL1500_.jpg" },
+  { n: "OCEAN MAN", m: 899, p: 499, nt: "Sea Salt, Sage, Grapefruit", img: "https://m.media-amazon.com/images/I/61p-E2M-iWL._SL1500_.jpg" },
+  { n: "ROSE WOMAN", m: 999, p: 549, nt: "Rose, Jasmine, Amber", img: "https://m.media-amazon.com/images/I/61f2O7L0VWL._SL1500_.jpg" },
+  { n: "CEO WOMAN", m: 999, p: 549, nt: "Bergamot, Patchouli, Musk", img: "https://m.media-amazon.com/images/I/618S94-mXDL._SL1500_.jpg" },
+  { n: "UNISEX GIFT SET", m: 1299, p: 749, nt: "4 Luxury Miniatures", img: "https://m.media-amazon.com/images/I/71Yf1CqF9kL._SL1500_.jpg" },
+  { n: "MAN PERFUME SET", m: 1299, p: 749, nt: "CEO, Klub, Skai, White Oud", img: "https://m.media-amazon.com/images/I/71I3fXyL7CL._SL1500_.jpg" },
+  { n: "D-LUX GIFT BOX", m: 1999, p: 999, nt: "Premium Large Gift Box", img: "https://m.media-amazon.com/images/I/71wK+Y7B8PL._SL1500_.jpg" },
+  { n: "E-LUX GIFT BOX", m: 1999, p: 999, nt: "Elegant Woman's Gift Box", img: "https://m.media-amazon.com/images/I/71M-1tV-bLL._SL1500_.jpg" },
+  { n: "POKER FACE", m: 899, p: 499, nt: "Lemon, Mint, Wood", img: "https://m.media-amazon.com/images/I/61S8b6z5kML._SL1500_.jpg" },
+  { n: "G.O.A.T MAN", m: 899, p: 499, nt: "Bergamot, Juniper, Patchouli", img: "https://m.media-amazon.com/images/I/61XFpUj-WkL._SL1500_.jpg" },
+  { n: "BELLAVITA BLU", m: 799, p: 449, nt: "Cool Water, Citrus", img: "https://m.media-amazon.com/images/I/61J6Uf9fXGL._SL1500_.jpg" },
+  { n: "OUDH 18K", m: 1299, p: 799, nt: "Pure Saffron & Oud", img: "https://m.media-amazon.com/images/I/61eM+vY8RUL._SL1500_.jpg" },
+  { n: "LUXURY BODY MIST", m: 499, p: 299, nt: "Floral & Fresh Mist", img: "https://m.media-amazon.com/images/I/61A8FpS7KkL._SL1500_.jpg" },
+  { n: "DARK OUD", m: 999, p: 599, nt: "Charcoal & Woody Oud", img: "https://m.media-amazon.com/images/I/61E5p6v6ZkL._SL1500_.jpg" },
+  { n: "SWAG MAN", m: 799, p: 399, nt: "Spicy & Bold Scent", img: "https://m.media-amazon.com/images/I/61Z7U0y6vKL._SL1500_.jpg" },
+  { n: "CHANCE WOMAN", m: 999, p: 549, nt: "Sweet Floral & Musk", img: "https://m.media-amazon.com/images/I/61k8vV6y9ML._SL1500_.jpg" },
+  { n: "STORM MAN", m: 899, p: 499, nt: "Thunder & Rain Freshness", img: "https://m.media-amazon.com/images/I/61V9pUv6GKL._SL1500_.jpg" },
+  { n: "LEGEND MAN", m: 999, p: 599, nt: "Ancient Woods & Spice", img: "https://m.media-amazon.com/images/I/61Y7V9p8GKL._SL1500_.jpg" }
+];
+
+function draw() {
+  document.getElementById('mainGrid').innerHTML = products.map(p => `
+    <div class="card">
+      <img src="${p.img}">
+      <h3>${p.n}</h3>
+      <p class="notes">${p.nt}</p>
+      <div class="price"><span class="mrp">₹${p.m}</span>₹${p.p}</div>
+      <button class="btn-direct" onclick="openPay('${p.n}', ${p.p})">Direct Order</button>
+    </div>
+  `).join('');
+}
+
+function openPay(name, price) {
+  selectedItem = name; selectedPrice = price;
+  document.getElementById('checkout').style.display = 'flex';
+  document.getElementById('success-screen').style.display = 'none';
+}
+
+function startVerification() {
+  document.getElementById('success-screen').style.display = 'flex';
+  document.getElementById('loading-state').style.display = 'block';
+  document.getElementById('confirmed-state').style.display = 'none';
+  
+  setTimeout(() => {
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('confirmed-state').style.display = 'block';
+    document.getElementById('conf-prod').innerText = selectedItem;
+    document.getElementById('waFinal').href = `https://wa.me/${waNo}?text=PAYMENT%20DONE%0AProduct:%20${encodeURIComponent(selectedItem)}%0AAmount:%20₹${selectedPrice}%0AHere%20is%20my%20screenshot%20and%20address.`;
+  }, 3000);
+}
+
+function closePay() { document.getElementById('checkout').style.display = 'none'; }
+
+// 13 Hour Flash Sale Clock
+let totalSec = 13 * 3600;
+setInterval(() => {
+  totalSec--;
+  let h = Math.floor(totalSec / 3600);
+  let m = Math.floor((totalSec % 3600) / 60);
+  let s = totalSec % 60;
+  document.getElementById('clock').innerText = `${h}:${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+}, 1000);
+
+draw();
+</script>
+</body>
+</html>
